@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Study Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.15);
+  --text: #f0ede8;
+  --text-muted: #888;
+  --text-dim: #444;
+  --accent-gold: #c9a84c;
+  --accent-gold-dim: rgba(201,168,76,0.12);
+  --accent-teal: #3db88a;
+  --accent-teal-dim: rgba(61,184,138,0.1);
+  --accent-blue: #4a9eff;
+  --accent-blue-dim: rgba(74,158,255,0.1);
+  --accent-coral: #e8705a;
+  --accent-coral-dim: rgba(232,112,90,0.1);
+  --accent-purple: #9b7fe8;
+  --accent-purple-dim: rgba(155,127,232,0.1);
+}
+
+html { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+
+body { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+/* Header */
+.site-header { margin-bottom: 4rem; }
+
+.site-header .eyebrow {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; letter-spacing: 0.2em;
+  color: var(--text-dim); text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.site-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 800; line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.site-header h1 span { color: var(--accent-gold); }
+
+.site-header .subtitle {
+  font-size: 0.9rem; color: var(--text-muted);
+  font-weight: 300; line-height: 1.7; max-width: 480px;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex; gap: 2rem; align-items: center;
+  margin-bottom: 3rem;
+  padding: 1rem 0;
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+}
+
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+.stat-divider { width: 0.5px; height: 32px; background: var(--border); }
+
+/* Section label */
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 1.2rem;
+}
+
+/* Cards grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1px;
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.study-card {
+  background: var(--surface);
+  padding: 1.75rem 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+  cursor: pointer;
+  text-decoration: none; color: inherit;
+  transition: background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.study-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--card-accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.study-card:hover { background: var(--surface2); }
+.study-card:hover::before { transform: scaleX(1); }
+
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--card-accent-dim);
+  border: 0.5px solid var(--card-accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.card-meta {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 0.25rem;
+}
+
+.card-badge {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+  padding: 2px 8px; border-radius: 20px;
+  background: var(--card-accent-dim);
+  color: var(--card-accent);
+  border: 0.5px solid var(--card-accent-border);
+}
+
+.card-status {
+  font-size: 10px; color: var(--text-dim);
+  margin-left: auto;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--text); line-height: 1.3;
+}
+
+.card-desc {
+  font-size: 0.8rem; color: var(--text-muted);
+  line-height: 1.6; font-weight: 300;
+}
+
+.card-progress-row {
+  display: flex; align-items: center; gap: 10px; margin-top: auto;
+}
+
+.card-progress-track {
+  flex: 1; height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.card-progress-fill {
+  height: 100%;
+  background: var(--card-accent);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+.card-progress-text {
+  font-size: 11px; color: var(--text-dim);
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  min-width: 32px; text-align: right;
+}
+
+/* Coming soon card */
+.card-coming {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Footer */
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 0.5px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+
+.footer-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.footer-date {
+  font-size: 11px; color: var(--text-dim);
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.site-header { animation: fadeUp 0.5s ease both; }
+.stats-bar { animation: fadeUp 0.5s 0.1s ease both; }
+.cards-grid { animation: fadeUp 0.5s 0.2s ease both; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  body { padding: 2rem 1rem 4rem; }
+  .stats-bar { gap: 1.2rem; }
+  .stat-value { font-size: 1.1rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <p class="eyebrow">slaydevmaster · daily study</p>
+  <h1>Study<br><span>Hub</span></h1>
+  <p class="subtitle">매일 아침 열고, 오늘 할 것 바로 시작. 주제별 커리큘럼을 따라가며 꾸준히 쌓아가는 공간.</p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-value" id="total-topics">1</span>
+    <span class="stat-label">활성 주제</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <span class="stat-value" id="total-days">14</span>
+    <span class="stat-label">총 학습일</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <span class="stat-value" id="completed-days">0</span>
+    <span class="stat-label">완료</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <span class="stat-value" id="streak">0</span>
+    <span class="stat-label">연속일</span>
+  </div>
+</div>
+
+<p class="section-label">학습 주제</p>
+
+<div class="cards-grid">
+
+  <!-- Pairs Trading -->
+  <a class="study-card" href="./pairs-trading/index.html"
+     style="--card-accent: #3db88a; --card-accent-dim: rgba(61,184,138,0.08); --card-accent-border: rgba(61,184,138,0.2);">
+    <div class="card-icon">📈</div>
+    <div>
+      <div class="card-meta">
+        <span class="card-badge">퀀트</span>
+        <span class="card-status" id="pt-status">진행 중</span>
+      </div>
+      <div class="card-title">Pairs Trading</div>
+    </div>
+    <div class="card-desc">두 자산의 관계를 이용한 시장 중립 전략. 스프레드, z-score, 공적분까지 14일 완성.</div>
+    <div class="card-progress-row">
+      <div class="card-progress-track">
+        <div class="card-progress-fill" id="pt-progress" style="width: 0%"></div>
+      </div>
+      <span class="card-progress-text" id="pt-pct">0%</span>
+    </div>
+  </a>
+
+  <!-- 시세 / 경제 - coming soon -->
+  <div class="study-card card-coming"
+       style="--card-accent: #c9a84c; --card-accent-dim: rgba(201,168,76,0.08); --card-accent-border: rgba(201,168,76,0.2);">
+    <div class="card-icon">🏦</div>
+    <div>
+      <div class="card-meta">
+        <span class="card-badge">경제</span>
+        <span class="card-status">준비 중</span>
+      </div>
+      <div class="card-title">시세 & 경제 지표</div>
+    </div>
+    <div class="card-desc">금리, 환율, 매크로 지표 읽는 법. 시장 구조를 이해하는 기초.</div>
+    <div class="card-progress-row">
+      <div class="card-progress-track">
+        <div class="card-progress-fill" style="width: 0%"></div>
+      </div>
+      <span class="card-progress-text">—</span>
+    </div>
+  </div>
+
+  <!-- Python / 통계 - coming soon -->
+  <div class="study-card card-coming"
+       style="--card-accent: #4a9eff; --card-accent-dim: rgba(74,158,255,0.08); --card-accent-border: rgba(74,158,255,0.2);">
+    <div class="card-icon">🐍</div>
+    <div>
+      <div class="card-meta">
+        <span class="card-badge">개발</span>
+        <span class="card-status">준비 중</span>
+      </div>
+      <div class="card-title">Python & 통계</div>
+    </div>
+    <div class="card-desc">pandas, numpy, statsmodels. 퀀트 전략 구현에 필요한 파이썬 실전.</div>
+    <div class="card-progress-row">
+      <div class="card-progress-track">
+        <div class="card-progress-fill" style="width: 0%"></div>
+      </div>
+      <span class="card-progress-text">—</span>
+    </div>
+  </div>
+
+  <!-- 알고리즘 트레이딩 - coming soon -->
+  <div class="study-card card-coming"
+       style="--card-accent: #9b7fe8; --card-accent-dim: rgba(155,127,232,0.08); --card-accent-border: rgba(155,127,232,0.2);">
+    <div class="card-icon">⚙️</div>
+    <div>
+      <div class="card-meta">
+        <span class="card-badge">자동매매</span>
+        <span class="card-status">준비 중</span>
+      </div>
+      <div class="card-title">알고리즘 트레이딩</div>
+    </div>
+    <div class="card-desc">전략 자동화, 백테스트 프레임워크, 실전 주문 연동까지.</div>
+    <div class="card-progress-row">
+      <div class="card-progress-track">
+        <div class="card-progress-fill" style="width: 0%"></div>
+      </div>
+      <span class="card-progress-text">—</span>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <span class="footer-brand">DAILY STUDY HUB</span>
+  <span class="footer-date" id="today-date"></span>
+</footer>
+
+<script>
+// Read pairs-trading progress from localStorage
+const ptDone = JSON.parse(localStorage.getItem('pt_done') || '[]');
+const ptCount = ptDone.length;
+const ptPct = Math.round(ptCount / 14 * 100);
+
+document.getElementById('pt-progress').style.width = ptPct + '%';
+document.getElementById('pt-pct').textContent = ptPct + '%';
+document.getElementById('completed-days').textContent = ptCount;
+
+if (ptCount === 14) {
+  document.getElementById('pt-status').textContent = '완료 ✓';
+} else if (ptCount > 0) {
+  document.getElementById('pt-status').textContent = ptCount + '/14일';
+}
+
+// Today date
+const d = new Date();
+document.getElementById('today-date').textContent =
+  d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+
+// Simple streak calc (days since last visit)
+const lastVisit = localStorage.getItem('last_visit');
+const today = d.toDateString();
+let streak = parseInt(localStorage.getItem('streak') || '0');
+if (lastVisit !== today) {
+  const yesterday = new Date(d); yesterday.setDate(d.getDate()-1);
+  if (lastVisit === yesterday.toDateString()) streak++;
+  else if (!lastVisit) streak = 1;
+  else streak = 1;
+  localStorage.setItem('streak', streak);
+  localStorage.setItem('last_visit', today);
+}
+document.getElementById('streak').textContent = streak;
+</script>
+</body>
+</html>
