@@ -198,6 +198,31 @@ body { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
 .action-btn:hover { opacity: 0.7; }
 .btn-gen { background: rgba(201,168,76,0.08); color: #c9a84c; border-color: rgba(201,168,76,0.2); }
 .btn-ext { background: var(--blue-dim); color: var(--blue); border-color: var(--blue-border); }
+.btn-audio { background: var(--purple-dim); color: var(--purple); border-color: var(--purple-border); }
+.btn-video { background: var(--coral-dim); color: var(--coral); border-color: var(--coral-border); }
+.btn-audio.active { background: var(--purple); color: #121212; border-color: var(--purple); }
+.action-btn.btn-disabled {
+  background: var(--gray-dim); color: var(--text-dim);
+  border-color: var(--gray-border);
+  cursor: not-allowed; pointer-events: none;
+  position: relative;
+}
+
+/* Inline media player */
+.day-media {
+  padding-top: 6px; border-top: 0.5px solid var(--border);
+  display: none;
+}
+.day-media.open { display: block; }
+.day-media audio {
+  width: 100%; height: 32px;
+  border-radius: 6px;
+  color-scheme: dark;
+}
+.media-error {
+  font-size: 10px; color: var(--coral);
+  padding: 6px 2px; line-height: 1.4;
+}
 
 /* Flow footer */
 .flow-bar {
@@ -314,6 +339,7 @@ const DAYS = [
     tagline:'두 자산 관계가 벌어지면 되돌아옴에 베팅',
     slots:['☀️ 페어트레이딩 정의 읽기','🚇 시장 중립 전략 개요 듣기','🌙 두 자산 관계 한 줄 복습'],
     ext:{label:'인사이트캠퍼스',url:'https://insightcampus.co.kr/2019/01/07/%ED%8E%98%EC%96%B4-%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%94%A9-%EA%B8%B0%EC%B4%88%ED%8E%B8-11-%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%94%A9-%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4/'},
+    audio:'./audio/day-01.mp3',
     prompt:'페어트레이딩(Pairs Trading)이 무엇인지 초보자용 한국어로 설명해줘. 예시를 들어서.'
   },
   {
@@ -425,6 +451,32 @@ function openClaude(prompt) {
   window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
 }
 
+function toggleAudio(day, src) {
+  const wrap = document.getElementById('media-' + day);
+  const btn = document.querySelector(`[data-audio-toggle="${day}"]`);
+  if (!wrap) return;
+
+  if (wrap.classList.contains('open')) {
+    const a = wrap.querySelector('audio');
+    if (a) a.pause();
+    wrap.classList.remove('open');
+    wrap.innerHTML = '';
+    if (btn) btn.classList.remove('active');
+    return;
+  }
+
+  // Open — insert audio element
+  wrap.innerHTML = `<audio controls preload="metadata" src="${src}"></audio>`;
+  const audio = wrap.querySelector('audio');
+  audio.addEventListener('error', () => {
+    wrap.innerHTML = `<div class="media-error">오디오 파일을 찾을 수 없어요. <code>${src}</code> 경로 확인해주세요.</div>`;
+  });
+  wrap.classList.add('open');
+  if (btn) btn.classList.add('active');
+  // Try autoplay (will be blocked in some browsers — user needs to tap play)
+  audio.play().catch(() => {});
+}
+
 function buildCards() {
   const container = document.getElementById('curriculum');
   let currentWeek = 0;
@@ -458,10 +510,17 @@ function buildCards() {
     const card = document.createElement('div');
     card.className = 'day-card' + (done.has(d.day) ? ' done' : '');
 
+    const audioBtn = d.audio
+      ? `<span class="action-btn btn-audio" data-audio-toggle="${d.day}" onclick="event.stopPropagation();toggleAudio(${d.day},'${d.audio}')">🎧 오디오</span>`
+      : `<span class="action-btn btn-audio btn-disabled" title="준비 중">🎧 오디오</span>`;
+    const videoBtn = d.video
+      ? `<a class="action-btn btn-video" href="${d.video}" target="_blank" onclick="event.stopPropagation()">🎬 동영상 ↗</a>`
+      : `<span class="action-btn btn-video btn-disabled" title="준비 중">🎬 동영상</span>`;
+
     card.innerHTML = `
       <div class="day-card-top">
         <span class="day-num" style="background:${c.bg};color:${c.text};border-color:${c.border}">${d.day}일차</span>
-        <span class="day-check" style="${done.has(d.day) ? 'background:#3db88a;border-color:#3db88a;color:#0a0a0a' : ''}">✓</span>
+        <span class="day-check" style="${done.has(d.day) ? 'background:#3db88a;border-color:#3db88a;color:#121212' : ''}">✓</span>
       </div>
       <div class="day-concept">${d.concept}</div>
       <div class="day-tagline">${d.tagline}</div>
@@ -469,14 +528,17 @@ function buildCards() {
         ${d.slots.map(s => `<div class="slot"><span class="slot-ico">${s.split(' ')[0]}</span><span>${s.split(' ').slice(1).join(' ')}</span></div>`).join('')}
       </div>
       <div class="day-actions">
+        ${audioBtn}
+        ${videoBtn}
         ${d.prompt ? `<span class="action-btn btn-gen" onclick="event.stopPropagation();openClaude('${d.prompt.replace(/'/g,"\\'").replace(/\n/g,' ')}')">AI 설명 ↗</span>` : ''}
         ${d.ext ? `<a class="action-btn btn-ext" href="${d.ext.url}" target="_blank" onclick="event.stopPropagation()">${d.ext.label} ↗</a>` : ''}
       </div>
+      <div class="day-media" id="media-${d.day}" onclick="event.stopPropagation()"></div>
     `;
 
     card.addEventListener('click', () => {
       if (done.has(d.day)) { done.delete(d.day); card.classList.remove('done'); card.querySelector('.day-check').style.cssText=''; }
-      else { done.add(d.day); card.classList.add('done'); card.querySelector('.day-check').style.cssText='background:#3db88a;border-color:#3db88a;color:#0a0a0a'; }
+      else { done.add(d.day); card.classList.add('done'); card.querySelector('.day-check').style.cssText='background:#3db88a;border-color:#3db88a;color:#121212'; }
       localStorage.setItem('pt_done', JSON.stringify([...done]));
       updateProgress();
     });
